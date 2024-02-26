@@ -1,8 +1,11 @@
+"""
+INCLUIR DOCSTRING
+"""
 module BCB
 
-include("Currency.jl")
+include("Currency.jl"); using .Currency
 
-export greet, getcurrency_list
+export greet
 
 greet() = print("Hello BCB! Its Julia!")
 
