@@ -3,6 +3,8 @@
 
 #* Created by azeredo-e@GitHub
 
+#test
+
 """
 The GetCurrency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
 """
