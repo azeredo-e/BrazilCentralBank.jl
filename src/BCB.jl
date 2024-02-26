@@ -7,6 +7,6 @@ include("Currency.jl"); using .Currency
 
 export greet
 
-greet() = print("Hello BCB! Its Julia!")
+greet() = print("Hello, BCB! It\'s Julia!")
 
 end # module BCB
