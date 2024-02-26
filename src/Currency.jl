@@ -19,6 +19,7 @@ using StringEncodings
 
 
 const CACHE = Dict()
+const ENCODING = "ISO-8859-1"
 
 
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
@@ -38,7 +39,7 @@ INCLUIR DOCSTRING
     type::String
     exclusion_date::Date
 
-    # "Metodos"
+    # "Methods"
     getforex::Function = target -> _get_forex(code, target)
 end
 
@@ -119,7 +120,7 @@ function _get_symbol(symbol, start_date, end_date)
     
     #For some god forsaken reason, HTTP.jl uses a vector of pairs in res.headers, that's why the weird syntax
     if startswith(res.headers[3][2], "text/html")
-        doc = parsehtml(String(decode(res.body, "ISO-8859-1")))
+        doc = parsehtml(String(decode(res.body, ENCODING)))
         res_msg::String = children(doc.root[2][1])[1].text
         replace!(res_msg, r"^\W+" => "")
         replace!(res_msg, r"^\W+$" => "")
@@ -139,7 +140,7 @@ function _get_symbol(symbol, start_date, end_date)
         :Column8 => Float64,
     )
     df = CSV.read(
-        IOBuffer(decode(res.body, "ISO-8859-1")), DataFrame; 
+        IOBuffer(decode(res.body, ENCODING)), DataFrame; 
         header=false,
         delim=';',
         decimal=',',
@@ -233,7 +234,7 @@ function getcurrency_list(convert_to_utf::Bool=true)
 
     res = _get_current_currency_list(today())
     if convert_to_utf
-        df = CSV.read(IOBuffer(decode(res.body, "ISO-8859-1")), DataFrame)
+        df = CSV.read(IOBuffer(decode(res.body, ENCODING)), DataFrame)
     else
         df = CSV.read(IOBuffer(res.body), DataFrame)
     end
@@ -277,13 +278,25 @@ end
 
 
 """
-INCLUIR DOCSTRING
-"""
-function gettemporalseries(symbols::Union{String, Array},
+    gettemporalseries(symbols::Union{String, Array},
                            start,
                            finish,
                            side="ask",
-                           groupby="symbol")
+                           groupby="symbol") -> DataFrame
+
+DataFrame with the time series of selected currencies.
+
+# Args:
+symbol (Union{String, Array}): ISO code of desired currencies.
+start (Any)
+
+"""
+function gettimeseries(symbols::Union{String, Array},
+                           start::Any,
+                           finish::Any,
+                           side::String="ask",
+                           groupby::String="symbol")
+    #TODO: Fix types of arguments
     if isa(symbols, String)
         symbols = [symbols]
     end
