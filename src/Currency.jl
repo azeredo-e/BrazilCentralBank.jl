@@ -4,9 +4,9 @@
 #* Created by azeredo-e@GitHub
 
 """
-O módulo (inserir aqui o nome do módulo) tem como realizar as consultas no site de conversor de moedas do BCB.
+The Currency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
 """
-module Currency
+module GetCurrency
 
 import Base.@kwdef
 
@@ -29,7 +29,7 @@ const CACHE = Dict()
 """
 INCLUIR DOCSTRING
 """
-@kwdef struct currency
+@kwdef struct Currency
     code::Int32
     name::String
     symbol::String
@@ -54,8 +54,8 @@ function _currency_url(currency_id, start_date, end_date)
     url = "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?"*
           "method=gerarCSVFechamentoMoedaNoPeriodo&"*
           "ChkMoeda=$currency_id"*
-          "&DATAINI=$(Dates.format(start_date, "d/m/Y"))"*
-          "&DATAFIM=$(Dates.format(end_date, "d/m/Y"))"
+          "&DATAINI=$(Dates.format(start_date, "dd/mm/Y"))"*
+          "&DATAFIM=$(Dates.format(end_date, "dd/mm/Y"))"
 
     return url
 end
@@ -113,9 +113,50 @@ end
 
 function _get_symbol(symbol, start_date, end_date)
     cid = _get_currency_id_list()
+    #TODO: Create a check for the dates, max interval is 6 months
     url = _currency_url(cid, start_date, end_date)
     res = HTTP.get(url)
     
+    #For some god forsaken reason, HTTP.jl uses a vector of pairs in res.headers, that's why the weird syntax
+    if startswith(res.headers[3][2], "text/html")
+        doc = parsehtml(String(decode(res.body, "ISO-8859-1")))
+        res_msg::String = children(doc.root[2][1])[1].text
+        replace!(res_msg, r"^\W+" => "")
+        replace!(res_msg, r"^\W+$" => "")
+        msg = "BCB API returned error: $res_msg - $symbol"
+        @warn msg
+        return nothing
+    end
+
+    col_types = Dict(
+        :Column1 => Date,
+        :Column2 => Int64,
+        :Column3 => String,
+        :Column4 => String,
+        :Column5 => Float64,
+        :Column6 => Float64,
+        :Column7 => Float64,
+        :Column8 => Float64,
+    )
+    df = CSV.read(
+        IOBuffer(decode(res.body, "ISO-8859-1")), DataFrame; 
+        header=false,
+        delim=';',
+        decimal=',',
+        types=col_types,
+        dateformat="ddmmyyyy"
+    )
+    rename!(df, 
+        [:Date,
+        :aa,
+        :bb,
+        :cc,
+        :bid,
+        :ask,
+        :dd,
+        :ee]
+    )
+
 end
 
 
@@ -218,7 +259,7 @@ function getcurrency_list(convert_to_utf::Bool=true)
     df.country_code = passmissing(convert).(Int32, df.country_code)
     df.country_name = passmissing(convert).(String, df.country_name)
     df.type = passmissing(convert).(String, df.type)
-    df.exclusion_date = passmissing(x -> Date(x, DateFormat("d/m/y"))).(df.exclusion_date)
+    df.exclusion_date = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.exclusion_date)
 
     CACHE["CURRENCY_LIST"] = df
     
@@ -276,10 +317,10 @@ function gettemporalseries(symbols::Union{String, Array},
 end
 
 
-function __init__()
-    Base.compile(getcurrency_list)
-    Base.compile(getcurrency_info)
-    Base.compile(gettemporalseries)
-end
+# function __init__()
+#     Base.compile(getcurrency_list)
+#     Base.compile(getcurrency_info)
+#     Base.compile(gettemporalseries)
+# end
 
 end # Currency module
