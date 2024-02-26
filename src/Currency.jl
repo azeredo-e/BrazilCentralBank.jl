@@ -13,8 +13,27 @@ using Dates
 using HTTP
 using StringEncodings
 
+
 const CACHE = Dict()
 
+"""
+INCLUIR DOCSTRING
+"""
+@kwdef struct Currency
+    code::Int32
+    name::String
+    symbol::String
+    country_code::Int32
+    country_name::String
+    type::String
+    exclusion_date::Date
+    getforex::Function = target -> _getforex(code, target)
+end
+
+
+function _getforex(current::Inf32, target::Union{String, Int32})
+    
+end
 
 
 function _get_current_currency_list(_date, n=0)
@@ -57,9 +76,9 @@ DataFrames.DataFrame: DataFrame com todas as informações da moedas.
 julia> getcurrency_list()
 303×7 DataFrame
  Row │ code   name               symbol    country_code  country_name    type     exclusion_date 
-     │ Int32  String             String    Int32         String          String   Date     
+     │ Int32  String             String    Int32         String          String   Date
 ─────┼──────────────────────────────────────────────────────────────────────────────────────────
-   1 │     5  AFEGANE AFEGANIST       AFN           132  AFEGANISTAO  …        A         missing
+   1 │     5  AFEGANE AFEGANIST       AFN           132  AFEGANISTAO          A          missing
                                                 ...
 ```
 """
@@ -86,6 +105,9 @@ function getcurrency_list(convert_to_utf::Bool=true)
         :exclusion_date]
     )
     df = subset(df, :country_code => ByRow(!ismissing))
+
+    df.symbol = map(x -> strip(x, [' ', '\n', '\t']), df.symbol)
+    df.name = map(x -> strip(x, [' ', '\n', '\t']), df.name)
     
     df.code = passmissing(convert).(Int32, df.code)
     df.name = passmissing(convert).(String, df.name)
@@ -94,9 +116,6 @@ function getcurrency_list(convert_to_utf::Bool=true)
     df.country_name = passmissing(convert).(String, df.country_name)
     df.type = passmissing(convert).(String, df.type)
     df.exclusion_date = passmissing(x -> Date(x, DateFormat("d/m/y"))).(df.exclusion_date)
-
-    df.symbol = map(x -> strip(x, [' ', '\n', '\t']), df.symbol)
-    df.name = map(x -> strip(x, [' ', '\n', '\t']), df.name)
 
     CACHE["CURRENCY_LIST"] = df
     
@@ -112,9 +131,49 @@ function getcurrency_list(convert_to_utf::Bool=true)
     # end
 end
 
-function getcurrency_info(code::Integer)
+
+"""
+INCLUIR DOCSTRING
+"""
+function getcurrency_info(codigo::Integer)
+    if haskey(CACHE, :CURRENCY_LIST)
+        df = get(CACHE, :CURRENCY_LIST, missing)
+    else
+        df = getcurrency_list()
+    end
+
+    return Currency(
+        df[df.code .== codigo, 1][1],
+        df[df.code .== codigo, 2][1],
+        df[df.code .== codigo, 3][1],
+        df[df.code .== codigo, 4][1],
+        df[df.code .== codigo, 5][1],
+        df[df.code .== codigo, 6][1],
+        df[df.code .== codigo, 7][1]
+    )
     
 end
-function getcurrency_info(code::String)
-    
+function getcurrency_info(nome::String)
+    if haskey(CACHE, :CURRENCY_LIST)
+        df = get(CACHE, :CURRENCY_LIST, missing)
+    else
+        df = getcurrency_list()
+    end
+
+    return Currency(
+        df[df.symbol .== nome, 1][1],
+        df[df.symbol .== nome, 2][1],
+        df[df.symbol .== nome, 3][1],
+        df[df.symbol .== nome, 4][1],
+        df[df.symbol .== nome, 5][1],
+        df[df.symbol .== nome, 6][1],
+        df[df.symbol .== nome, 7][1]
+    )
+end
+
+
+function gettemporalseries(symbols::Union{String, Array})
+    if isa(symbols, String)
+        symbols = [symbols]
+    end
 end
