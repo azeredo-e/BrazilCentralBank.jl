@@ -21,9 +21,9 @@ using StringEncodings
 const CACHE = Dict()
 
 
-#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#*                                  STRUCT
-#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#*                                STRUCT
+#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
 
 """
@@ -43,15 +43,31 @@ INCLUIR DOCSTRING
 end
 
 
-#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
-#*                                FUNCTIONS
-#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#*                              FUNCTIONS
+#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+function _currency_url(currency_id, start_date, end_date)
+    start_date = Date(start_date)
+    end_date = Date(end_date)
+
+    url = "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?"*
+          "method=gerarCSVFechamentoMoedaNoPeriodo&"*
+          "ChkMoeda=$currency_id"*
+          "&DATAINI=$(Dates.format(start_date, "d/m/Y"))"*
+          "&DATAFIM=$(Dates.format(end_date, "d/m/Y"))"
+
+    return url
+end
+
+
 function _get_currency_id_list()
     if haskey(CACHE, :CURRENCY_ID_LIST)
         return get(CACHE, :CURRENCY_ID_LIST, missing)
     end
 
-    url = "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?method=exibeFormularioConsultaBoletim"
+    url = "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?"*
+          "method=exibeFormularioConsultaBoletim"
 
     res = HTTP.get(url).body |> String |> parsehtml
 
@@ -96,7 +112,10 @@ end
 
 
 function _get_symbol(symbol, start_date, end_date)
-    id_list = _get_currency_id_list()
+    cid = _get_currency_id_list()
+    url = _currency_url(cid, start_date, end_date)
+    res = HTTP.get(url)
+    
 end
 
 
@@ -143,7 +162,8 @@ end
 """
     get_currency_list(convert_to_utf=true, english_names=true) -> DataFrame
 
-Lista todas as moedas disponíveis pela API assim como informações básicas como código, país de origem, etc.
+Lista todas as moedas disponíveis pela API assim como informações básicas como código, 
+país de origem, etc.
 
 # Args  
 convert_to_utf (Bool, optional): Por padrão os dados do BCB vem com a encoding "ISO-8859-1" 
