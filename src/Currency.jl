@@ -4,7 +4,7 @@
 #* Created by azeredo-e@GitHub
 
 """
-The Currency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
+The GetCurrency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
 """
 module GetCurrency
 
@@ -28,7 +28,7 @@ const ENCODING = "ISO-8859-1"
 
 
 """
-INCLUIR DOCSTRING
+INCLUDE DOCSTRING
 """
 @kwdef struct Currency
     code::Int32
@@ -107,7 +107,7 @@ function _get_current_currency_list(_date, n=0)
 end
 
 
-function _get_forex(current::Inf32, target::Union{String, Int32})
+function _get_forex(current::Integer, target::Union{String, Int32})
     nothing
 end
 
@@ -157,12 +157,12 @@ function _get_symbol(symbol, start_date, end_date)
         :dd,
         :ee]
     )
-
+    #TODO: How the f* do I do a multilayer index in julia?!
 end
 
 
 """
-INCLUIR DOCSTRING
+INCLUDE DOCSTRING
 """
 function getcurrency_info(codigo::Integer)
     if haskey(CACHE, :CURRENCY_LIST)
@@ -202,18 +202,19 @@ end
 
 
 """
-    get_currency_list(convert_to_utf=true, english_names=true) -> DataFrame
+    get_currency_list(convert_to_utf=true) -> DataFrame
 
-Lista todas as moedas disponíveis pela API assim como informações básicas como código, 
-país de origem, etc.
+List all avaliables currencies in the BCB API, as well as basic information such as currency code,
+country of origin, etc.
+
 
 # Args  
-convert_to_utf (Bool, optional): Por padrão os dados do BCB vem com a encoding "ISO-8859-1" 
-diferente do padrão UTF-8 de Julia, esse parâmetro força a conversão, prevenindo erros de encoding. 
-Defaults to true.
+convert_to_utf (Bool, optional): By default BCB information comes in the ISO-8859-1 encoding,
+different from the UTF-8 pattern used by Julia. This argument forces the API result to come in UTF-8, 
+preventing encoding errors. Defaults to true.
 
 # Returns   
-DataFrames.DataFrame: DataFrame com todas as informações da moedas.
+DataFrames.DataFrame: DataFrame with all valiable currencies information.
 
 # Examples
 
@@ -223,7 +224,7 @@ julia> getcurrency_list()
  Row │ code   name               symbol    country_code  country_name    type     exclusion_date 
      │ Int32  String             String    Int32         String          String   Date
 ─────┼──────────────────────────────────────────────────────────────────────────────────────────
-   1 │     5  AFEGANE AFEGANIST       AFN           132  AFEGANISTAO          A          missing
+   1 │     5  AFEGANE AFEGANIST       AFN           132   AFEGANISTAO         A          missing
                                                 ...
 ```
 """
@@ -288,15 +289,16 @@ DataFrame with the time series of selected currencies.
 
 # Args:
 symbol (Union{String, Array}): ISO code of desired currencies.
-start (Any)
+start (Any): Desired start date.
+end (Any): Desired end date.
 
 """
 function gettimeseries(symbols::Union{String, Array},
-                           start::Any,
-                           finish::Any,
-                           side::String="ask",
-                           groupby::String="symbol")
-    #TODO: Fix types of arguments
+                       start::Any, #TODO: Need to format this to make sure it works independent of the input type (str, int, float, etc)
+                       finish::Any,
+                       side::String="ask",
+                       groupby::String="symbol")
+    #TODO: Fix types of a arguments
     if isa(symbols, String)
         symbols = [symbols]
     end
@@ -312,17 +314,19 @@ function gettimeseries(symbols::Union{String, Array},
     if length(dss) > 0
         df = hcat(dss...) #Tenho que checar isso aqui para garantir que não tenham colunas repetidas, se sim tenho que formatar elas antes
         if side ∈ ("bid", "ask")
+            #TODO: Implement here
             nothing
         elseif side == "both"
             if groupby == "symbol"
                 return df
             elseif groupby == "side"
+                #TODO: Implement here
                 nothing
             else
-                return nothing
+                thow(ArgumentError("Unknown groupby value, use: symbol, side"))
             end
         else
-            throw(ArgumentError("Unknow side value, use: bid, ask, both"))
+            thow(ArgumentError("Unknown side value, use: bid, ask, both"))
         end
     else
         return nothing

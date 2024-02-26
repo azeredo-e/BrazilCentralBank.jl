@@ -8,4 +8,4 @@ The project was inspired by [python-bcb](https://github.com/wilsonfreitas/python
 
 ## Status
 
-O projeto ainda está nos seus primeiros dias de desenvolvimento. Todas as funções ainda são protótipos e nenhuma está 100% operacional ainda.
+The project is still in its early days, a pre-alpha stage. Although some functions already work, none of them is of much value until the core of the GetCurrency module (first module being developed) is completed.
