@@ -1,0 +1,4 @@
+name = "BCB"
+uuid = "1db8e8ca-f8ef-4fae-b3f5-ea2940ece087"
+authors = ["Eduardo Azeredo <eduardo.aeredo99@gmail.com>"]
+version = "0.1.0"

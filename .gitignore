@@ -1,0 +1,10 @@
+#Ignore personal files
+.env
+
+#Ignore folders
+.vscode/
+releases/
+BCB.py/
+python-bcb/
+project-test/
+
