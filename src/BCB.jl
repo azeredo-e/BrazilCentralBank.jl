@@ -2,7 +2,7 @@ module BCB
 
 include("Currency.jl")
 
-export greet, get_currency_list
+export greet, getcurrency_list
 
 greet() = print("Hello BCB! Its Julia!")
 
