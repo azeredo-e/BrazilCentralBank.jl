@@ -1,9 +1,5 @@
 
-#TODO: parametrizar as funções quando possível
-
 #* Created by azeredo-e@GitHub
-
-#test
 
 """
 The GetCurrency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
@@ -114,8 +110,17 @@ function _get_forex(current::Integer, target::Union{String, Int32})
 end
 
 
-function _get_symbol(symbol, start_date, end_date)
-    cid = _get_currency_id_list()
+function _get_currency_id(symbol::String)
+    id_list = _get_currency_id_list()
+    all_currencies = getcurrency_list()
+
+    df = innerjoin(id_list, all_currencies, on=:name)
+    return maximum(df[df.symbol .== symbol, :].id)
+end
+
+
+function _get_symbol(symbol::String, start_date, end_date)
+    cid = _get_currency_id(symbol)
     #TODO: Create a check for the dates, max interval is 6 months
     url = _currency_url(cid, start_date, end_date)
     res = HTTP.get(url)
@@ -159,6 +164,8 @@ function _get_symbol(symbol, start_date, end_date)
         :dd,
         :ee]
     )
+
+
     #TODO: How the f* do I do a multilayer index in julia?!
 end
 
@@ -166,7 +173,7 @@ end
 """
 INCLUDE DOCSTRING
 """
-function getcurrency_info(codigo::Integer)
+function getcurrency(code::Integer)
     if haskey(CACHE, :CURRENCY_LIST)
         df = get(CACHE, :CURRENCY_LIST, missing)
     else
@@ -174,17 +181,17 @@ function getcurrency_info(codigo::Integer)
     end
 
     return Currency(
-        df[df.code .== codigo, 1][1],
-        df[df.code .== codigo, 2][1],
-        df[df.code .== codigo, 3][1],
-        df[df.code .== codigo, 4][1],
-        df[df.code .== codigo, 5][1],
-        df[df.code .== codigo, 6][1],
-        df[df.code .== codigo, 7][1]
+        df[df.code .== code, 1][1],
+        df[df.code .== code, 2][1],
+        df[df.code .== code, 3][1],
+        df[df.code .== code, 4][1],
+        df[df.code .== code, 5][1],
+        df[df.code .== code, 6][1],
+        df[df.code .== code, 7][1]
     )
     
 end
-function getcurrency_info(nome::String)
+function getcurrency(name::String)
     if haskey(CACHE, :CURRENCY_LIST)
         df = get(CACHE, :CURRENCY_LIST, missing)
     else
@@ -192,13 +199,13 @@ function getcurrency_info(nome::String)
     end
 
     return Currency(
-        df[df.symbol .== nome, 1][1],
-        df[df.symbol .== nome, 2][1],
-        df[df.symbol .== nome, 3][1],
-        df[df.symbol .== nome, 4][1],
-        df[df.symbol .== nome, 5][1],
-        df[df.symbol .== nome, 6][1],
-        df[df.symbol .== nome, 7][1]
+        df[df.symbol .== name, 1][1],
+        df[df.symbol .== name, 2][1],
+        df[df.symbol .== name, 3][1],
+        df[df.symbol .== name, 4][1],
+        df[df.symbol .== name, 5][1],
+        df[df.symbol .== name, 6][1],
+        df[df.symbol .== name, 7][1]
     )
 end
 
@@ -281,11 +288,11 @@ end
 
 
 """
-    gettemporalseries(symbols::Union{String, Array},
-                           start,
-                           finish,
-                           side="ask",
-                           groupby="symbol") -> DataFrame
+    gettimeseries(symbols::Union{String, Array},
+                  start::Any,
+                  finish::Any,
+                  side::String="ask",
+                  groupby::String="symbol")
 
 DataFrame with the time series of selected currencies.
 
@@ -336,10 +343,10 @@ function gettimeseries(symbols::Union{String, Array},
 end
 
 
-# function __init__()
-#     Base.compile(getcurrency_list)
-#     Base.compile(getcurrency_info)
-#     Base.compile(gettemporalseries)
+# function __init__() #TODO: fix types
+#     precompile(getcurrency_list)
+#     precompile(getcurrency_info)
+#     precompile(gettemporalseries)
 # end
 
 end # Currency module
