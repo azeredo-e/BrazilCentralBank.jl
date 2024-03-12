@@ -3,10 +3,11 @@ INCLUIR DOCSTRING
 """
 module BCB
 
-include("Currency.jl"); using .Currency
+include("Currency.jl"); using .GetCurrency
 
+#TODO: Include exported functions
 export greet
 
-greet() = print("Hello, BCB! It\'s Julia!")
+greet() = print("Hello, BCB! It\'s Julia!\n")
 
 end # module BCB

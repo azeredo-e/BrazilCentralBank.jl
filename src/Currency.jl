@@ -16,6 +16,10 @@ using HTTP
 using StringEncodings
 
 
+#TODO: Include exported functions and structs
+export _get_symbol 
+
+
 const CACHE = Dict()
 const ENCODING = "ISO-8859-1"
 
@@ -113,7 +117,6 @@ end
 function _get_currency_id(symbol::String)
     id_list = _get_currency_id_list()
     all_currencies = getcurrency_list()
-
     df = innerjoin(id_list, all_currencies, on=:name)
     return maximum(df[df.symbol .== symbol, :].id)
 end
@@ -129,8 +132,8 @@ function _get_symbol(symbol::String, start_date, end_date)
     if startswith(res.headers[3][2], "text/html")
         doc = parsehtml(String(decode(res.body, ENCODING)))
         res_msg::String = children(doc.root[2][1])[1].text
-        replace!(res_msg, r"^\W+" => "")
-        replace!(res_msg, r"^\W+$" => "")
+        res_msg = replace(res_msg, r"^\W+" => "")
+        res_msg = replace(res_msg, r"^\W+$" => "")
         msg = "BCB API returned error: $res_msg - $symbol"
         @warn msg
         return nothing
@@ -163,10 +166,17 @@ function _get_symbol(symbol::String, start_date, end_date)
         :ask,
         :dd,
         :ee]
+    )    
+    #TODO: How the f* do I do a multilayer index in julia?!
+    #? Answer, I can't, changing approach until they fix this
+    
+    df_bidask = df[:, [:Date, :bid, :ask]]
+    rename!(df_bidask,
+        :bid => "bid_$symbol",
+        :ask => "ask_$symbol"
     )
 
-
-    #TODO: How the f* do I do a multilayer index in julia?!
+    return df_bidask
 end
 
 
