@@ -207,7 +207,7 @@ function getcurrency(name::String)
     else
         df = getcurrency_list()
     end
-
+    #TODO: Include ID
     return Currency(
         df[df.symbol .== name, 1][1],
         df[df.symbol .== name, 2][1],
@@ -331,15 +331,14 @@ function gettimeseries(symbols::Union{String, Array},
         end
     end
     if length(dss) > 0
-        df = hcat(dss...) #Tenho que checar isso aqui para garantir que não tenham colunas repetidas, se sim tenho que formatar elas antes
+        df = innerjoin(dss..., on=:Date)
         if side ∈ ("bid", "ask")
-            #TODO: Implement here
-            nothing
+            return df[:, Regex("Date|$side")]
         elseif side == "both"
             if groupby == "symbol"
                 return df
             elseif groupby == "side"
-                #TODO: Implement here
+                #TODO: Create implementation
                 nothing
             else
                 thow(ArgumentError("Unknown groupby value, use: symbol, side"))
@@ -348,6 +347,7 @@ function gettimeseries(symbols::Union{String, Array},
             thow(ArgumentError("Unknown side value, use: bid, ask, both"))
         end
     else
+        @info "No values passed to the gettimeseries function."
         return nothing
     end
 end
