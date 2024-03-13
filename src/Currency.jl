@@ -4,7 +4,11 @@
 """
 The GetCurrency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
 """
-module GetCurrency
+#module GetCurrency
+# Changed implementation of modules, previously each file contained a module as defined in the line above,
+# changing to files where the module defined in BCB.jl manages everything. May change this in the future to
+# use the PatModules package or go back to the previous implementation of each file a module.
+
 
 import Base.@kwdef
 
@@ -16,8 +20,7 @@ using HTTP
 using StringEncodings
 
 
-#TODO: Include exported functions and structs
-export gettimeseries, getcurrency_list
+#export gettimeseries, getcurrency_list
 
 
 const CACHE = Dict()
@@ -373,4 +376,4 @@ end
 #     precompile(gettemporalseries)
 # end
 
-end # GetCurrency module
+#end # GetCurrency module
