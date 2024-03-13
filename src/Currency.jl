@@ -338,8 +338,7 @@ function gettimeseries(symbols::Union{String, Array},
             if groupby == "symbol"
                 return df
             elseif groupby == "side"
-                #TODO: Create implementation
-                nothing
+                return select(df, Regex("$side"), :)
             else
                 thow(ArgumentError("Unknown groupby value, use: symbol, side"))
             end
@@ -359,4 +358,4 @@ end
 #     precompile(gettemporalseries)
 # end
 
-end # Currency module
+end # GetCurrency module
