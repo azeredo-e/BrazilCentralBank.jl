@@ -17,7 +17,7 @@ using StringEncodings
 
 
 #TODO: Include exported functions and structs
-export _get_symbol 
+export gettimeseries, getcurrency_list
 
 
 const CACHE = Dict()
@@ -330,7 +330,22 @@ function gettimeseries(symbols::Union{String, Array},
             push!(dss, df_symbol)
         end
     end
-    if length(dss) > 0
+    if length(dss) == 1
+        df = dss[1]
+        if side ∈ ("bid", "ask")
+            return df[:, Regex("Date|$side")]
+        elseif side == "both"
+            if groupby == "symbol"
+                return df
+            elseif groupby == "side"
+                return select(df, Regex("$side"), :)
+            else
+                thow(ArgumentError("Unknown groupby value, use: symbol, side"))
+            end
+        else
+            thow(ArgumentError("Unknown side value, use: bid, ask, both"))
+        end
+    elseif length(dss) > 1
         df = innerjoin(dss..., on=:Date)
         if side ∈ ("bid", "ask")
             return df[:, Regex("Date|$side")]
