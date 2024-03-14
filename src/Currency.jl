@@ -11,6 +11,7 @@ The GetCurrency module is responsible for managing all querys to the BCB Forex (
 
 
 import Base.@kwdef
+import Dates.AbstractTime
 
 using CSV
 using DataFrames
@@ -121,7 +122,11 @@ function _get_currency_id(symbol::String)
     id_list = _get_currency_id_list()
     all_currencies = getcurrency_list()
     df = innerjoin(id_list, all_currencies, on=:name)
-    return maximum(df[df.symbol .== symbol, :].id)
+    if symbol in df.symbol
+        return maximum(df[df.symbol .== symbol, :].id)
+    else
+        throw(ArgumentError("Symbol not found. Check valid currencies list"))
+    end
 end
 
 
@@ -311,13 +316,23 @@ DataFrame with the time series of selected currencies.
 
 # Args:
 symbol (Union{String, Array}): ISO code of desired currencies.
-start (Any): Desired start date.
-end (Any): Desired end date.
+start (Union{AbstractTime, AbstractString, Number}): Desired start date. The type are set this way because it
+can accept any valid input to Dates.Date().
+end (Union{AbstractTime, AbstractString, Number}): Desired end date.
+side (String, optional): Which values for the foreign exchange prices to return "ask", "side" or "both".
+Defaults to "ask".
+groupby (String, optional): In what way the columns are grouped, "symbol" or "side".
+
+# Returns
+DataFrame: DataFrame with foreign currency prices.
+
+# Raises
+ArgumentError: Values passed to `side` or `groupby` are not valid.
 
 """
 function gettimeseries(symbols::Union{String, Array},
-                       start::Any, #TODO: Need to format this to make sure it works independent of the input type (str, int, float, etc)
-                       finish::Any,
+                       start::Union{AbstractTime, AbstractString, Number},
+                       finish::Union{AbstractTime, AbstractString, Number}; #Keyword arguments starts here
                        side::String="ask",
                        groupby::String="symbol")
     #TODO: Fix types of a arguments
