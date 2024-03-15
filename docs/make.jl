@@ -1,5 +1,13 @@
 import Dates.AbstractTime
 
-using Documenter, BrazilCentralBank
+using BrazilCentralBank
+using Documenter
 
-makedocs(sitename="BrazilCentralBank")
+DocMeta.setdocmeta!(BrazilCentralBank, :DocTestSetup, :(using BrazilCentralBank); recursive=true)
+
+makedocs(
+    sitename = "BrazilCentralBank.jl",
+    format = Documenter.HTML(),
+    modules = [BrazilCentralBank],
+    checkdocs = :export
+)

@@ -1,10 +1,12 @@
-#Ignore personal files
-.env
+#Documenter files
+docs/build
+docs/Manifest.toml
+
+#Personal Files
+Manifest.Toml
 
 #Ignore folders
 .vscode/
 releases/
-BCB.py/
 python-bcb/
 project-test/
-

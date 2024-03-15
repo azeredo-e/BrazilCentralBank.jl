@@ -14,7 +14,7 @@ The final goal is for this to be a comprehensive set of tools for anyone trying 
 
 ## Instalation
 
-Source code are avaliable in this project directory, but instalation through Julia's package manager is also avaliable.
+Source code are avaliable in this project directory, but instalation through Julia's package manager will soon be avaliable.
 
 ```julia
 julia> using Pkg; Pkg.add(BrazilCentralBank)
@@ -24,6 +24,6 @@ julia> using Pkg; Pkg.add(BrazilCentralBank)
 
 ```@docs
 BrazilCentralBank
-getcurrency_list()
+getcurrency_list(;convert_to_utf=true)
 gettimeseries(symbols::Union{String, Array}, start::Union{AbstractTime, AbstractString, Number}, finish::Union{AbstractTime, AbstractString, Number}; side::String="side", groupby::String="symbol")
 ```

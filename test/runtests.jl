@@ -5,7 +5,7 @@ using DataFrames
 using Dates
 using Test
 
-greetBCB()
+BrazilCentralBank.greetBCB()
 
 @testset begin
     @test BrazilCentralBank._get_currency_id("USD") == 61
