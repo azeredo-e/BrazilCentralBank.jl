@@ -245,6 +245,7 @@ DataFrames.DataFrame: DataFrame with all avaliable currencies information.
 
 # Examples:
 ```jldoctest
+julia> using BrazilCentralBank
 julia> getcurrency_list()
 303×7 DataFrame
  Row │ code   name               symbol    country_code  country_name    type     exclusion_date 
@@ -330,6 +331,7 @@ ArgumentError: Values passed to `side` or `groupby` are not valid.
 
 # Examples:
 ```jldoctest
+julia> using BrazilCentralBank
 julia> gettimeseries("USD", "2023-12-01", "2023-12-10")
 6×2 DataFrame
  Row │ Date        ask_USD 
