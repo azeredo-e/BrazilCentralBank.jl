@@ -1,4 +1,4 @@
-name = "BCB"
+name = "BrazilCentralBank"
 uuid = "1db8e8ca-f8ef-4fae-b3f5-ea2940ece087"
 authors = ["Eduardo Azeredo <eduardo.aeredo99@gmail.com>"]
 version = "0.1.0"
@@ -12,3 +12,11 @@ Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 StringEncodings = "69024149-9ee7-55f6-a4c4-859efe599b68"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+julia = "1.9.1"
+CSV = "0.10.13"
+DataFrames = "1.6.1"
+Gumbo = "0.8.2"
+HTTP = "1.10.3"
+StringEncodings = "0.3.7"
