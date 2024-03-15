@@ -18,7 +18,7 @@ The final goal is for this to be a comprehensive set of tools for anyone trying 
 
 ## Instalation
 
-Source code are avaliable in this project directory, but instalation through Julia's package manager is also avaliable.
+Source code are avaliable in this project directory, but instalation through Julia's package manager will be avaliable soon.
 
 ```julia
 julia> using Pkg; Pkg.add(BCB)
