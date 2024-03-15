@@ -246,12 +246,27 @@ DataFrames.DataFrame: DataFrame with all avaliable currencies information.
 # Examples:
 ```jldoctest
 julia> getcurrency_list()
-303×7 DataFrame
- Row │ code   name               symbol    country_code  country_name    type     exclusion_date 
-     │ Int32  String             String    Int32         String          String   Date
-─────┼──────────────────────────────────────────────────────────────────────────────────────────
-   1 │     5  AFEGANE AFEGANIST       AFN           132   AFEGANISTAO         A          missing
-[...]
+273×7 DataFrame
+│  Row │ code   name                          symbol  country_code  country_name ⋯
+│      │ Int32  String                        String  Int32         String       ⋯
+│ ─────┼──────────────────────────────────────────────────────────────────────────
+│    1 │     5  AFEGANE AFEGANIST             AFN              132  AFEGANISTAO  ⋯
+│    2 │   785  RANDE/AFRICA SUL              ZAR             7560  AFRICA DO SU
+│    3 │   490  LEK ALBANIA REP               ALL              175  ALBANIA, REP
+│    4 │   610  MARCO ALEMAO                  DEM              230  ALEMANHA
+│    5 │   978  EURO                          EUR              230  ALEMANHA     ⋯
+│    6 │   690  PESETA/ANDORA                 ADP              370  ANDORRA
+│    7 │   635  KWANZA/ANGOLA                 AOA              400  ANGOLA
+│    8 │   215  DOLAR CARIBE ORIENTAL         XCD              418  ANGUILLA
+│   ⋮  │   ⋮                 ⋮                  ⋮          ⋮                     ⋱
+│  267 │    26  BOLIVAR VENEZUELANO           VEF             8508  VENEZUELA    ⋯
+│  268 │   260  DONGUE/VIETNAN                VND             8583  VIETNA
+│  269 │   220  DOLAR DOS EUA                 USD             8630  VIRGENS,ILHA
+│  270 │   220  DOLAR DOS EUA                 USD             8664  VIRGENS,ILHA
+│  271 │   766  QUACHA ZAMBIA                 ZMW             8907  ZAMBIA       ⋯
+│  272 │   765  QUACHA ZAMBIA                 ZMK             8907  ZAMBIA
+│  273 │   217  DOLAR ZIMBABUE                ZWL             6653  ZIMBABUE
+│                                                   3 columns and 258 rows omitted
 ```
 """
 function getcurrency_list(;convert_to_utf::Bool=true)
