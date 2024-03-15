@@ -2,7 +2,7 @@
 #* Created by azeredo-e@GitHub
 
 """
-The GetCurrency module is responsible for managing all querys to the BCB Forex (Foreign Exchange) API
+The GetCurrency module is responsible for managing all querys to the BCB FOREX (Foreign Exchange) API
 """
 #module GetCurrency
 # Changed implementation of modules, previously each file contained a module as defined in the line above,
@@ -229,22 +229,21 @@ end
 
 
 """
-    get_currency_list(convert_to_utf=true) -> DataFrame
+    get_currency_list(;convert_to_utf=true) -> DataFrame
 
 List all avaliables currencies in the BCB API, as well as basic information such as currency code,
 country of origin, etc.
 
 
-# Args  
+# Args:
 convert_to_utf (Bool, optional): By default BCB information comes in the ISO-8859-1 encoding,
 different from the UTF-8 pattern used by Julia. This argument forces the API result to come in UTF-8, 
 preventing encoding errors. Defaults to true.
 
-# Returns   
-DataFrames.DataFrame: DataFrame with all valiable currencies information.
+# Returns:
+DataFrames.DataFrame: DataFrame with all avaliable currencies information.
 
-# Examples
-
+# Examples:
 ```jldoctest
 julia> getcurrency_list()
 303×7 DataFrame
@@ -255,7 +254,7 @@ julia> getcurrency_list()
                                                 ...
 ```
 """
-function getcurrency_list(convert_to_utf::Bool=true)
+function getcurrency_list(;convert_to_utf::Bool=true)
     if haskey(CACHE, :CURRENCY_LIST)
         return get(CACHE, :CURRENCY_LIST, missing)
     end
@@ -315,19 +314,34 @@ end
 DataFrame with the time series of selected currencies.
 
 # Args:
-symbol (Union{String, Array}): ISO code of desired currencies.
-start (Union{AbstractTime, AbstractString, Number}): Desired start date. The type are set this way because it
-can accept any valid input to Dates.Date().
-end (Union{AbstractTime, AbstractString, Number}): Desired end date.
-side (String, optional): Which values for the foreign exchange prices to return "ask", "side" or "both".
-Defaults to "ask".
+symbol (Union{String, Array}): ISO code of desired currencies.\\
+start (Union{AbstractTime, AbstractString, Number}): Desired start date. The type are set this way because
+it can accept any valid input to Dates.Date().\\
+end (Union{AbstractTime, AbstractString, Number}): Desired end date.\\
+side (String, optional): Which FOREX prices to return "ask" prices, "side" prices or "both".
+Defaults to "ask".\\
 groupby (String, optional): In what way the columns are grouped, "symbol" or "side".
 
-# Returns
-DataFrame: DataFrame with foreign currency prices.
+# Returns:
+DataFrames.DataFrame: DataFrame with foreign currency prices.
 
-# Raises
+# Raises:
 ArgumentError: Values passed to `side` or `groupby` are not valid.
+
+# Examples:
+```jldoctest
+julia> gettimeseries("USD", "2023-12-01", "2023-12-10")
+6×2 DataFrame
+ Row │ Date        ask_USD 
+     │ Date        Float64
+─────┼─────────────────────
+   1 │ 2023-12-01   4.9191
+   2 │ 2023-12-04   4.9091
+   3 │ 2023-12-05   4.9522
+   4 │ 2023-12-06   4.9031
+   5 │ 2023-12-07   4.8949
+   6 │ 2023-12-08   4.9158
+```
 
 """
 function gettimeseries(symbols::Union{String, Array},

@@ -1,12 +1,8 @@
-# BCB.jl
+# BCB.jl Documentation
 
-BCB.jl é uma interface na linguagem de programação Julia para a API de dados do Banco Central do Brasil.  
-O projeto foi inspirado por [python-bcb](https://github.com/wilsonfreitas/python-bcb) criado por wilsonfreitas@GitHub.
+Welcome to the documentation page!
 
-BCB.jl is an interface in the Julia programming language for the data API of Brazil's Central Bank (BCB).  
-The project was inspired by [python-bcb](https://github.com/wilsonfreitas/python-bcb) created by wilsonfreitas@GitHub.
-
-## About the project
+## About the Project
 
 > Current release: 0.1.0 (2024-03-14)
 
@@ -22,4 +18,12 @@ Source code are avaliable in this project directory, but instalation through Jul
 
 ```julia
 julia> using Pkg; Pkg.add(BCB)
+```
+
+## API Documentation
+
+```@docs
+BCB
+getcurrency_list()
+gettimeseries(symbols::Union{String, Array}, start::Union{AbstractTime, AbstractString, Number}, finish::Union{AbstractTime, AbstractString, Number}; side::String="side", groupby::String="symbol")
 ```
