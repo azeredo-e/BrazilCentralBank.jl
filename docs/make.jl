@@ -1,5 +1,5 @@
 import Dates.AbstractTime
 
-using Documenter, BCB
+using Documenter, BrazilCentralBank
 
-makedocs(sitename="BCB")
+makedocs(sitename="BrazilCentralBank")
