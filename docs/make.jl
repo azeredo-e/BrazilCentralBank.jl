@@ -12,6 +12,6 @@ makedocs(
     checkdocs = :export
 )
 
-deploydocs(
-    repo="github.com/azeredo-e/BrazilCentralBank.jl.git"
+deploydocs(;
+    repo="github.com/azeredo-e/BrazilCentralBank.jl",
 )
