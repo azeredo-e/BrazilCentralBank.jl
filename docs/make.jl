@@ -9,7 +9,6 @@ makedocs(
     sitename = "BrazilCentralBank.jl",
     format = Documenter.HTML(),
     modules = [BrazilCentralBank],
-    checkdocs = :export
 )
 
 deploydocs(
