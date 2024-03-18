@@ -11,3 +11,7 @@ makedocs(
     modules = [BrazilCentralBank],
     checkdocs = :export
 )
+
+deploydocs(
+    repo="github.com/azeredo-e/BrazilCentralBank.jl.git"
+)
