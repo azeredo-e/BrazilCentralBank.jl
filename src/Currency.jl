@@ -23,6 +23,8 @@ using StringEncodings
 
 #export gettimeseries, getcurrency_list
 
+#TODO: Add a multiple dispatch option to plot
+
 
 const CACHE = Dict()
 const ENCODING = "ISO-8859-1"
@@ -33,20 +35,59 @@ const ENCODING = "ISO-8859-1"
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
 
-"""
-INCLUDE DOCSTRING
-"""
-@kwdef struct Currency
-    code::Int32
-    name::String
-    symbol::String
-    country_code::Int32
-    country_name::String
-    type::String
-    exclusion_date::Date
+"
+Instance of the Currency type. 
+
+A `Currency` is an instance of the Currency type attribuited to a specific currency supported by the
+BrazilCentralBank.jl API, you can check the list of avaliable currencies with. `getcurrency_list()`.
+
+A `Currency` has many fields that describe not only the information for the coin but also provides methods
+applied directly on the instance for retrieving information about the currency. For more notes on the
+implementation check the \"Strucs Methods\" section in the documentation.
+
+# Fields
+code(<:Integer): Currency code as in `getcurrency_list`.\\
+name(<:AbstractString): Name of the currency.\\
+symbol(<:AbstractString): ISO three letter currency code.\\
+country_code(<:AbstractString): ISO country code.\\
+country_name(<:AbstractString): Country name in portuguese.\\
+type(<:AbstractString): In ype A currencies, to convert the value to USD divide the currency. In type B\\
+you multiply.\\
+exclusion_date(<:AbstractTime): Exclusion date of currency. When it was discontinued.
+
+# \"Methods\"
+    getforex(target::Union{AbstractString, Array{AbstractString}}; kwargs...)
+
+## Args
+target(Union{AbstractString, Array{AbstractString}}): ISO code of selected currencies.\\
+kwargs: `kwargs` passed to `gettimeseries()`
+
+## Returns
+DataFrame: Selected currencies information.
+"
+@kwdef struct Currency{I<:Integer, F<:Function, S<:AbstractString, D<:Union{AbstractTime, Missing}}
+    code::I
+    name::S
+    symbol::S
+    country_code::I
+    country_name::S
+    type::S
+    exclusion_date::D
 
     # "Methods"
-    getforex::Function = target -> _get_forex(code, target)
+    gettimeseries::F = function _getforexseries(
+        target::Union{AbstractString, Array},
+        start::Union{AbstractTime, AbstractString, Number},
+        finish::Union{AbstractTime, AbstractString, Number};
+        kwargs...
+    )
+        #TODO: Change this to the new name in 0.2.0
+        if target isa Array
+            return gettimeseries([symbol, target...], start, finish; kwargs...)
+        else
+            return gettimeseries([symbol, target], start, finish; kwargs...)
+        end
+    end
 end
 
 
@@ -110,11 +151,6 @@ function _get_current_currency_list(_date, n=0)
     else
         return _get_current_currency_list(_date - Day(1), 0)
     end
-end
-
-
-function _get_forex(current::Integer, target::Union{String, Int32})
-    nothing
 end
 
 
@@ -189,9 +225,23 @@ end
 
 
 """
-INCLUDE DOCSTRING
+    getCurrency(code::Integer) -> Currency
+
+A `Currency` is an instance of the Currency type attribuited to a specific currency supported by the
+BrazilCentralBank.jl API, you can check the list of avaliable currencies with. `getcurrency_list()`.
+
+A `Currency` has many fields that describe not only the information for the coin but also provides methods
+applied directly on the instance for retrieving information about the currency. For more notes on the
+implementation check the "Strucs Methods" section in the documentation.
+
+# Args
+code(Integer): Code for the currency as is in `getcurrency_list()`.
+
+# Returns
+Currency: Desired currency
+```
 """
-function getcurrency(code::Integer)
+function getCurrency(code::Integer)
     if haskey(CACHE, :CURRENCY_LIST)
         df = get(CACHE, :CURRENCY_LIST, missing)
     else
@@ -199,17 +249,33 @@ function getcurrency(code::Integer)
     end
 
     return Currency(
-        df[df.code .== code, 1][1],
-        df[df.code .== code, 2][1],
-        df[df.code .== code, 3][1],
-        df[df.code .== code, 4][1],
-        df[df.code .== code, 5][1],
-        df[df.code .== code, 6][1],
-        df[df.code .== code, 7][1]
+        code = df[df.code .== code, 1][1],
+        name = df[df.code .== code, 2][1],
+        symbol = df[df.code .== code, 3][1],
+        country_code = df[df.code .== code, 4][1],
+        country_name = df[df.code .== code, 5][1],
+        type = df[df.code .== code, 6][1],
+        exclusion_date = df[df.code .== code, 7][1]
     )
     
 end
-function getcurrency(name::String)
+"""
+    getCurrency(code::String) -> Currency
+
+A `Currency` is an instance of the Currency type attribuited to a specific currency supported by the
+BrazilCentralBank.jl API, you can check the list of avaliable currencies with. `getcurrency_list()`.
+
+A `Currency` has many fields that describe not only the information for the coin but also provides methods
+applied directly on the instance for retrieving information about the currency. For more notes on the
+implementation check the "Strucs Methods" section in the documentation.
+
+# Args: 
+symbol(String): ISO three letter code for the currency.
+
+# Returns
+Currency: Desired currency
+"""
+function getCurrency(symbol::String)
     if haskey(CACHE, :CURRENCY_LIST)
         df = get(CACHE, :CURRENCY_LIST, missing)
     else
@@ -217,13 +283,13 @@ function getcurrency(name::String)
     end
     #TODO: Include ID
     return Currency(
-        df[df.symbol .== name, 1][1],
-        df[df.symbol .== name, 2][1],
-        df[df.symbol .== name, 3][1],
-        df[df.symbol .== name, 4][1],
-        df[df.symbol .== name, 5][1],
-        df[df.symbol .== name, 6][1],
-        df[df.symbol .== name, 7][1]
+        code = df[df.symbol .== symbol, 1][1],
+        name = df[df.symbol .== symbol, 2][1],
+        symbol = df[df.symbol .== symbol, 3][1],
+        country_code = df[df.symbol .== symbol, 4][1],
+        country_name = df[df.symbol .== symbol, 5][1],
+        type = df[df.symbol .== symbol, 6][1],
+        exclusion_date = df[df.symbol .== symbol, 7][1]
     )
 end
 
@@ -295,6 +361,7 @@ function getcurrency_list(;convert_to_utf::Bool=true)
 
     df.symbol = map(x -> strip(x, [' ', '\n', '\t']), df.symbol)
     df.name = map(x -> strip(x, [' ', '\n', '\t']), df.name)
+    df.country_name = map(x -> strip(x, [' ', '\n', '\t']), df.country_name)
     
     df.code = passmissing(convert).(Int32, df.code)
     df.name = passmissing(convert).(String, df.name)
@@ -319,7 +386,7 @@ function getcurrency_list(;convert_to_utf::Bool=true)
 end
 
 
-"""
+""" #!fix name for 0.2.0
     gettimeseries(symbols::Union{String, Array},
                   start::Any,
                   finish::Any,
@@ -344,7 +411,7 @@ DataFrames.DataFrame: DataFrame with foreign currency prices.
 ArgumentError: Values passed to `side` or `groupby` are not valid.
 
 # Examples:
-```jldoctest
+```jldoctest #! fix for 0.2.0
 julia> gettimeseries("USD", "2023-12-01", "2023-12-10")
 6×2 DataFrame
  Row │ Date        ask_USD 
@@ -365,6 +432,8 @@ function gettimeseries(symbols::Union{String, Array},
                        side::String="ask",
                        groupby::String="symbol")
     #TODO: Fix types of a arguments
+    @warn "In the next minor release (0.2.0) will be included the time series module from the BCB API
+         so this function will have it's name changed to `getcurrencyseries`"
     if isa(symbols, String)
         symbols = [symbols]
     end
@@ -412,12 +481,5 @@ function gettimeseries(symbols::Union{String, Array},
         return nothing
     end
 end
-
-
-# function __init__() #TODO: fix types
-#     precompile(getcurrency_list)
-#     precompile(getcurrency_info)
-#     precompile(gettemporalseries)
-# end
 
 #end # GetCurrency module
