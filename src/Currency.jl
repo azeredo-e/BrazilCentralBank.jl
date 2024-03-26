@@ -124,7 +124,7 @@ function _get_currency_id_list()
     df = DataFrame(map(idx -> getindex.(select_vals, idx), eachindex(first(select_vals))), [:name, :id])
     df.id = parse.(Int32, df.id)
     
-    CACHE["CURRENCY_ID_LIST"] = df
+    CACHE[:CURRENCY_ID_LIST] = df
 
     return df
 end
@@ -371,7 +371,7 @@ function getcurrency_list(;convert_to_utf::Bool=true)
     df.type = passmissing(convert).(String, df.type)
     df.exclusion_date = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.exclusion_date)
 
-    CACHE["CURRENCY_LIST"] = df
+    CACHE[:CURRENCY_LIST] = df
     
     return df
 
