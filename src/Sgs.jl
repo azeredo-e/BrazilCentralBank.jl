@@ -37,6 +37,42 @@ end
 
 
 """
+    gettimeseries(codes; start=nothing, finish=nothing,
+                  last=0, multi=true)
+
+Returns a DataFrame with the SGS time series.
+
+# Args
+codes(Number, AbstractString, Tuple{AbstractString, Number}, Array{AbstractString, Number}, Dict{AbstractString, Number}):\\
+    The codes for the desired time series, please not that even though any number
+    format is accepted, it is converted to an integer.\\
+    The codes can be in one of the following formats:\\
+    - `Number`: time-series code\\
+    - `Tuple`: tuple containing the desired time-series' codes\\
+    - `Tuple`: tuple containg the pair ("SeriesName", code)\\
+    - `Dict`: Dictionary with the pair ("SeriesName" => code)\\
+    When using codes is interesting to define names for the columns to be used in the time-series
+
+start(Number, String...): Any value that can be converted to a date with `Date()` is valid.\\
+Start date of the series.
+
+end(Number, String...): Any value that can be converted to a date with `Date()` is valid.\\
+End date of the series.
+
+last(Integer): If last is bigger than 0, `start` and `end` are ignored. Return the
+last *n* values of the series.
+
+multi(Bool): If true, returns a single series with multiple variable, if false,
+    returns a tuple of single variable series
+
+# Returns
+
+`DataFrame`: univariate or multivariate time series when `multi=true`.
+`Tuple{DataFrame}`: tuple of univariate time series when `multi=false`.
+
+# Raises
+
+
 """
 function gettimeseries(codes; start=nothing, finish=nothing,
                        last=0, multi=true, freq=nothing)
