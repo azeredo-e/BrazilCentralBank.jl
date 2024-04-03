@@ -9,6 +9,33 @@ using Dates
 # se fosse um struct
 
 
+#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+#*                                STRUCTS
+#* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+struct SGSCode{S<:AbstractString, N<:Number}
+    name::S
+    value::N
+
+    function SGSCode(code::Union{Number, AbstractString})
+        new(String(code), Int32(code))
+    end
+    function SGSCode(code::Tuple{AbstractString, Number})
+        new(String(code[1]), Int32(code[2]))
+    end
+    function SGSCode(code::Array{Union{AbstractString, Number}})
+        for cd in codes
+            typeof(cd) <: Tuple ? new(cd[1], cd[2]) : new(String(code), Int32(code))
+        end
+    end
+    function SGSCode(code::Dict{AbstractString, Number})
+        for cd in code
+            new(cd, code[cd])
+        end
+    end
+    #TODO: Add support to named tuples
+end
+
 
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #*                              FUNCTIONS
