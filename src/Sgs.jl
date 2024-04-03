@@ -62,6 +62,22 @@ function _get_url_payload(code, start_date, end_date, last)
 end
 
 
+function _format_df(df, code)
+    rename!(df,
+        [:data => "Date",
+         :valor => code.name,
+         :datafim => "enddate"]
+    )
+    if "Date" in names(df) 
+        df.Date = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.Date)
+    end
+    if "enddate" in names(df) 
+        df.enddate = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.enddate)
+    end
+    #TODO: Implement frequency, maybe create a type or something
+    return df
+end
+
 
 """
     gettimeseries(codes; start=nothing, finish=nothing,
