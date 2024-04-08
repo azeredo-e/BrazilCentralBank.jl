@@ -3,6 +3,8 @@
 
 
 using Dates
+using HTTP
+using JSON
 
 # A função get usa a função _codes para entender o input do usuário
 # com isso ela manda para a classe SGSCode para guardar o valor como
@@ -41,14 +43,13 @@ end
 #*                              FUNCTIONS
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-
 function _get_url_payload(code, start_date, end_date, last)
     payload = Dict(:format => "json")
     
     end_date_exists = @isdefined end_date
 
     if last == 0
-        if !(start_date == missing) || (end_date == missing)
+        if !(start_date == missing) || !(end_date == missing)
             payload[:dataInicial] = Dates.format(Date(start_date), "dd/mm/Y")
             end_date = end_date_exists ? end_date : today()
             payload[:dataFinal] = Dates.format(Date(end_date), "dd/mm/Y")
@@ -63,11 +64,19 @@ end
 
 
 function _format_df(df, code)
-    rename!(df,
-        [:data => "Date",
-         :valor => code.name,
-         :datafim => "enddate"]
-    )
+    
+    if :datafim in names(df)
+        rename!(df,
+            :data => "Date",
+            :valor => code.name,
+            :datafim => "enddate"
+        )
+    else
+        rename!(df,
+            :data => "Date",
+            :valor => code.name,
+        )
+    end
     if "Date" in names(df) 
         df.Date = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.Date)
     end
@@ -114,15 +123,31 @@ multi(Bool): If true, returns a single series with multiple variable, if false,
 `Tuple{DataFrame}`: tuple of univariate time series when `multi=false`.
 
 # Raises
-
+ErrorException: Failed to fetch time-series data.
 
 """
 function gettimeseries(codes; start=nothing, finish=nothing,
-                       last=0, multi=true, freq=nothing)
+                       last=0, multi=true)
     dfs = []
 
-    for code in _codes(codes)
-
+    for code in [SGSCode(codes)]
+        urd = _get_url_payload(code.value, start_date, end_date, last)
+        res = HTTP.get(urd[:url]; query=urd[:payload])
+        if res.status != 200
+            throw(ErrorException("Download error: code = $(code.value)"))
+        end
+        df = res.body |> String |> JSON.parse |> DataFrame
+        df = _format_df(df, code)
+        push!(dfs, df)
+        if length(dfs) == 1
+            return dfs[0]
+        else
+            if multi
+                return innerjoin(df..., on="Date")
+            else
+                return dfs
+            end
+        end
     end
 end
 

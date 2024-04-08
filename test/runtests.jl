@@ -28,4 +28,9 @@ BrazilCentralBank.greetBCB()
     @test EUR.gettimeseries("USD", Date(2020, 12, 01), Date(2020, 12, 05)) isa DataFrame
     @test EUR.gettimeseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05)) isa DataFrame
     @test EUR.gettimeseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05), groupby="symbol") isa DataFrame
+
+    # Ver. 0.2.0
+    
+
 end
+

@@ -213,7 +213,7 @@ function _get_symbol(symbol::String, start_date, end_date)
     )    
     #TODO: How the f* do I do a multilayer index in julia?!
     #? Answer, I can't, changing approach until they fix this
-    
+    #TODO: Check to see if it breaks before pushing to 0.2.0
     df_bidask = df[:, [:Date, :bid, :ask]]
     rename!(df_bidask,
         :bid => "bid_$symbol",

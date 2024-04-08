@@ -8,9 +8,12 @@ VERSION: 0.1.0
 """
 module BrazilCentralBank
 
-include("Currency.jl"); #using .GetCurrency
-export getcurrency_list, gettimeseries, getCurrency
+include("Currency.jl") #using .GetCurrency
+include("Sgs.jl")
 
+export getcurrency_list, gettimeseries, getCurrency
+       # Sgs
+       gettimeseries
 
 greetBCB() = print("Hello, BCB! It\'s Julia!\n")
 
