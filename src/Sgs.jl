@@ -20,28 +20,43 @@ struct SGSCode{S<:AbstractString, N<:Number}
     value::N
 
     function SGSCode(code::Union{Number, AbstractString})
-        new(String(code), Int32(code))
+        new{AbstractString, Number}(string(code), convertToInt32(code))
     end
     function SGSCode(code::Tuple{AbstractString, Number})
-        new(String(code[1]), Int32(code[2]))
+        new{AbstractString, Number}(string(code[1]), convertToInt32(code[2]))
     end
     function SGSCode(code::Array{Union{AbstractString, Number}})
-        for cd in codes
-            typeof(cd) <: Tuple ? new(cd[1], cd[2]) : new(String(code), Int32(code))
+        for cd in code
+            typeof(cd) <: Tuple ? 
+                new{AbstractString, Number}(cd[1], cd[2]) : 
+                new{AbstractString, Number}(string(cd), convertToInt32(cd))
         end
     end
     function SGSCode(code::Dict{AbstractString, Number})
         for cd in code
-            new(cd, code[cd])
+            new{AbstractString, Number}(cd, code[cd])
         end
+    end
+    function SGSCode(value::Number, name::AbstractString)
+        new{AbstractString, Number}(name, convertToInt32(value))
     end
     #TODO: Add support to named tuples
 end
 
-
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #*                              FUNCTIONS
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+function convertToInt32(input)
+    if isa(input, Number)
+        return Int32(input)
+    elseif isa(input, AbstractString)
+        return parse(Int32, input)
+    else
+        throw(ArgumentError("Input must be a number or string"))
+    end
+end
+
 
 function _get_url_payload(code, start_date, end_date, last)
     payload = Dict(:format => "json")

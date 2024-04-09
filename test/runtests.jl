@@ -7,11 +7,28 @@ using Test
 
 BrazilCentralBank.greetBCB()
 
+#For Ver. 0.2.0
+function test_series_code()
+    code = BrazilCentralBank.SGSCode(1)
+    @assert code.name == "1"
+    @assert code.value == 1
+
+    code = BrazilCentralBank.SGSCode(1)
+    @assert code.name == "1"
+    @assert code.value == 1
+
+    code = BrazilCentralBank.SGSCode(1, "name")
+    @assert code.name == "name"
+    @assert code.value == 1
+    return true
+end
+
+
 @testset begin
     # Ver. 0.1.0
     @test BrazilCentralBank._get_currency_id("USD") == 61
     @test getcurrency_list() isa DataFrame
-    @test BrazilCentralBank.CACHE["CURRENCY_LIST"] isa DataFrame
+    @test BrazilCentralBank.CACHE[:CURRENCY_LIST] isa DataFrame
     @test gettimeseries("USD", 2023, 2024; side="both") isa DataFrame
     @test gettimeseries(["USD", "CHF"], Date(2023), Date(2024)) isa DataFrame
     try
@@ -30,7 +47,7 @@ BrazilCentralBank.greetBCB()
     @test EUR.gettimeseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05), groupby="symbol") isa DataFrame
 
     # Ver. 0.2.0
-    
+    @test test_series_code()
 
 end
 
