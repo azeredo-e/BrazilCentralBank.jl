@@ -13,13 +13,23 @@ function test_series_code()
     @assert code.name == "1"
     @assert code.value == 1
 
-    code = BrazilCentralBank.SGSCode(1)
-    @assert code.name == "1"
-    @assert code.value == 1
-
-    code = BrazilCentralBank.SGSCode(1, "name")
+    code = BrazilCentralBank.SGSCode("name" => 1)
     @assert code.name == "name"
     @assert code.value == 1
+
+    return true
+end
+
+function test_series_code_iter(codes)
+    i = 0
+    for code in (BrazilCentralBank.SGSCode(i) for i in codes)
+        @assert code.name == "$(i+1)"
+        @assert code.value == i+1
+        i += 1
+    end
+
+    @assert length(codes) == i
+    
     return true
 end
 
@@ -37,7 +47,7 @@ end
         @test err isa ArgumentError
     end
     
-    # Ver. 0.1.1
+    # # Ver. 0.1.1
     EUR = getCurrency(978)
     @test EUR.symbol == "EUR"
     @test EUR isa BrazilCentralBank.Currency
@@ -48,6 +58,7 @@ end
 
     # Ver. 0.2.0
     @test test_series_code()
-
+    @test test_series_code_iter((1, 2))
+    @test test_series_code_iter([1, 2])
+    @test test_series_code_iter(Dict("1" => 1, "2" => 2))
 end
-

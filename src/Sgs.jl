@@ -19,29 +19,25 @@ struct SGSCode{S<:AbstractString, N<:Number}
     name::S
     value::N
 
-    function SGSCode(code::Union{Number, AbstractString})
+    function SGSCode(code::Integer)
         new{AbstractString, Number}(string(code), convertToInt32(code))
     end
-    function SGSCode(code::Tuple{AbstractString, Number})
-        new{AbstractString, Number}(string(code[1]), convertToInt32(code[2]))
-    end
-    function SGSCode(code::Array{Union{AbstractString, Number}})
-        for cd in code
-            typeof(cd) <: Tuple ? 
-                new{AbstractString, Number}(cd[1], cd[2]) : 
-                new{AbstractString, Number}(string(cd), convertToInt32(cd))
-        end
-    end
-    function SGSCode(code::Dict{AbstractString, Number})
-        for cd in code
-            new{AbstractString, Number}(cd, code[cd])
-        end
-    end
-    function SGSCode(value::Number, name::AbstractString)
-        new{AbstractString, Number}(name, convertToInt32(value))
+    function SGSCode(code::Pair)
+        new{AbstractString, Number}(code.first, convertToInt32(code.second))
     end
     #TODO: Add support to named tuples
+    # function SGSCode(code::Tuple{AbstractString, Number})
+    #     typeof(code[1]) <: AbstractString ? 
+    #         new{AbstractString, Number}(string(code[1]), convertToInt32(code[2])) :
+    #         new{AbstractString, Number}(string(code[2]), code[1])
+    # end
+    # function SGSCode(code::AbstractArray)
+    #     typeof(code[1]) <: AbstractString ? 
+    #         new{AbstractString, Number}(string(code[1]), convertToInt32(code[2])) :
+    #         new{AbstractString, Number}(string(code[2]), convertToInt32(code[1]))
+    # end
 end
+
 
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 #*                              FUNCTIONS
@@ -145,7 +141,7 @@ function gettimeseries(codes; start=nothing, finish=nothing,
                        last=0, multi=true)
     dfs = []
 
-    for code in [SGSCode(codes)]
+    for code in (SGSCode(i) for i in codes)
         urd = _get_url_payload(code.value, start_date, end_date, last)
         res = HTTP.get(urd[:url]; query=urd[:payload])
         if res.status != 200
