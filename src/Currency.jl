@@ -432,8 +432,6 @@ function gettimeseries(symbols::Union{String, Array},
                        side::String="ask",
                        groupby::String="symbol")
     #TODO: Fix types of a arguments
-    @warn "In the next minor release (0.2.0) will be included the time series module from the BCB API
-         so this function will have it's name changed to `getcurrencyseries`"
     if isa(symbols, String)
         symbols = [symbols]
     end
