@@ -58,6 +58,9 @@ function test_gettimeseries()
     x = gettimeseries((1, 433), last=5, multi=false)
     @assert x isa Array{DataFrame}
 
+    # Invalid series value test
+    gettimeseries(2, last=5)
+    
     return true
 end
 

@@ -110,12 +110,11 @@ Returns a DataFrame with the SGS time series.
 
 # Args
 codes(Number, AbstractString, Tuple{AbstractString, Number}, Array{AbstractString, Number}, Dict{AbstractString, Number}):\\
-    The codes for the desired time series, please not that even though any number
+    The codes for the desired time series, please note that even though any number
     format is accepted, it is converted to an integer.\\
     The codes can be in one of the following formats:\\
     - `Number`: time-series code\\
     - `Tuple`: tuple containing the desired time-series' codes\\
-    - `Tuple`: tuple containg the pair ("SeriesName", code)\\
     - `Dict`: Dictionary with the pair ("SeriesName" => code)\\
     When using codes is interesting to define names for the columns to be used in the time-series
 
@@ -129,12 +128,12 @@ last(Integer): If last is bigger than 0, `start` and `end` are ignored. Return t
 last *n* values of the series.
 
 multi(Bool): If true, returns a single series with multiple variable, if false,
-    returns a tuple of single variable series
+    returns a tuple of single variable series.
 
 # Returns
 
 `DataFrame`: univariate or multivariate time series when `multi=true`.
-`Tuple{DataFrame}`: tuple of univariate time series when `multi=false`.
+`Vector{DataFrame}`: vector of univariate time series when `multi=false`.
 
 # Raises
 ErrorException: Failed to fetch time-series data.
@@ -154,11 +153,19 @@ function gettimeseries(codes; start=nothing, finish=nothing,
         if res.status != 200
             throw(ErrorException("Download error: code = $(code.value)"))
         end
-        df = res.body |> String |> JSON.parse |> DataFrame
-        df = _format_df(df, code)
-        push!(dfs, df)
+        try
+            df = res.body |> String |> JSON.parse |> DataFrame
+            df = _format_df(df, code)
+            push!(dfs, df)
+        catch err
+            if err isa ErrorException
+                @warn "Invalid time series code, code = $(code.value)"
+            end
+        end
     end
-    if length(dfs) == 1
+    if length(dfs) == 0
+        return nothing
+    elseif length(dfs) == 1
         return dfs[1]
     else
         if multi
