@@ -1,10 +1,10 @@
 
 # Created by azeredo-e@GitHub
 
-
 using Dates
 using HTTP
 using JSON
+using DataFrames
 
 # A função get usa a função _codes para entender o input do usuário
 # com isso ela manda para a classe SGSCode para guardar o valor como
@@ -19,7 +19,7 @@ struct SGSCode{S<:AbstractString, N<:Number}
     name::S
     value::N
 
-    function SGSCode(code::Integer)
+    function SGSCode(code::Union{Integer, AbstractString})
         new{AbstractString, Number}(string(code), convertToInt32(code))
     end
     function SGSCode(code::Pair)
@@ -44,9 +44,9 @@ end
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
 function convertToInt32(input)
-    if isa(input, Number)
+    if typeof(input) <: Number
         return Int32(input)
-    elseif isa(input, AbstractString)
+    elseif typeof(input) <: AbstractString
         return parse(Int32, input)
     else
         throw(ArgumentError("Input must be a number or string"))
@@ -60,7 +60,7 @@ function _get_url_payload(code, start_date, end_date, last)
     end_date_exists = @isdefined end_date
 
     if last == 0
-        if !(start_date == missing) || !(end_date == missing)
+        if start_date !== nothing || end_date !== nothing
             payload[:dataInicial] = Dates.format(Date(start_date), "dd/mm/Y")
             end_date = end_date_exists ? end_date : today()
             payload[:dataFinal] = Dates.format(Date(end_date), "dd/mm/Y")
@@ -75,7 +75,6 @@ end
 
 
 function _format_df(df, code)
-    
     if :datafim in names(df)
         rename!(df,
             :data => "Date",
@@ -88,12 +87,16 @@ function _format_df(df, code)
             :valor => code.name,
         )
     end
+
+    df = select(df, "Date", names(df, Not("Date")))
+
     if "Date" in names(df) 
         df.Date = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.Date)
     end
     if "enddate" in names(df) 
         df.enddate = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.enddate)
     end
+    
     #TODO: Implement frequency, maybe create a type or something
     return df
 end
@@ -139,7 +142,11 @@ ErrorException: Failed to fetch time-series data.
 """
 function gettimeseries(codes; start=nothing, finish=nothing,
                        last=0, multi=true)
-    dfs = []
+    dfs::Vector{DataFrame} = []
+
+    if typeof(codes) <: AbstractString
+        codes = [codes]
+    end
 
     for code in (SGSCode(i) for i in codes)
         urd = _get_url_payload(code.value, start, finish, last)
@@ -150,14 +157,14 @@ function gettimeseries(codes; start=nothing, finish=nothing,
         df = res.body |> String |> JSON.parse |> DataFrame
         df = _format_df(df, code)
         push!(dfs, df)
-        if length(dfs) == 1
-            return dfs[0]
+    end
+    if length(dfs) == 1
+        return dfs[1]
+    else
+        if multi
+            return innerjoin(dfs..., on=:Date)
         else
-            if multi
-                return innerjoin(df..., on="Date")
-            else
-                return dfs
-            end
+            return dfs
         end
     end
 end

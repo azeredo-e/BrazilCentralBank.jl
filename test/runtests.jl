@@ -36,20 +36,27 @@ end
 function test_gettimeseries()
     x = gettimeseries(1, last=10)
     @assert x isa DataFrame
-    @assert names(x) == ["1"]
-    @assert length(x) == 10
+    @assert names(x) == ["Date", "1"]
+    @assert nrow(x) == 10
     
-    x = gettimeseries("USDBRL", last=5)
+    x = gettimeseries(Dict("USDBRL" => 1), last=5)
     @assert x isa DataFrame
-    @assert names(x) == ["USDBRL"]
-    @assert length(x) == 5
+    @assert names(x) == ["Date", "USDBRL"]
+    @assert nrow(x) == 5
 
-    x = gettimeseries("USDBRL", start="2021-01-18", finish="2021-01-22")
+    x = gettimeseries(Dict("USDBRL" => 1), start="2021-01-18", finish="2021-01-22")
     @assert x isa DataFrame
-    @assert names(x) == ["USDBRL"]
-    @assert length(x) == 5
-    @assert x[1, :date] == Date("2021-01-18")
-    @assert x[end, :date] == Date("2021-01-22")
+    @assert names(x) == ["Date", "USDBRL"]
+    @assert nrow(x) == 5
+    @assert x[1, "Date"] == Date("2021-01-18")
+    @assert x[end, "Date"] == Date("2021-01-22")
+
+    x = gettimeseries((1, 433), last=5)
+    @assert x isa DataFrame
+    @assert names(x) |> length == 3
+
+    x = gettimeseries((1, 433), last=5, multi=false)
+    @assert x isa Array{DataFrame}
 
     return true
 end
@@ -67,7 +74,7 @@ end
         @test err isa ArgumentError
     end
     
-    # # Ver. 0.1.1
+    # Ver. 0.1.1
     EUR = getCurrency(978)
     @test EUR.symbol == "EUR"
     @test EUR isa BrazilCentralBank.Currency
@@ -81,5 +88,5 @@ end
     @test test_series_code_iter((1, 2))
     @test test_series_code_iter([1, 2])
     @test test_series_code_iter(Dict("1" => 1, "2" => 2))
-
+    @test test_gettimeseries()
 end
