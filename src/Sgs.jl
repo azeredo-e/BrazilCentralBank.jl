@@ -142,7 +142,7 @@ function gettimeseries(codes; start=nothing, finish=nothing,
     dfs = []
 
     for code in (SGSCode(i) for i in codes)
-        urd = _get_url_payload(code.value, start_date, end_date, last)
+        urd = _get_url_payload(code.value, start, finish, last)
         res = HTTP.get(urd[:url]; query=urd[:payload])
         if res.status != 200
             throw(ErrorException("Download error: code = $(code.value)"))

@@ -33,6 +33,26 @@ function test_series_code_iter(codes)
     return true
 end
 
+function test_gettimeseries()
+    x = gettimeseries(1, last=10)
+    @assert x isa DataFrame
+    @assert names(x) == ["1"]
+    @assert length(x) == 10
+    
+    x = gettimeseries("USDBRL", last=5)
+    @assert x isa DataFrame
+    @assert names(x) == ["USDBRL"]
+    @assert length(x) == 5
+
+    x = gettimeseries("USDBRL", start="2021-01-18", finish="2021-01-22")
+    @assert x isa DataFrame
+    @assert names(x) == ["USDBRL"]
+    @assert length(x) == 5
+    @assert x[1, :date] == Date("2021-01-18")
+    @assert x[end, :date] == Date("2021-01-22")
+
+    return true
+end
 
 @testset begin
     # Ver. 0.1.0
@@ -61,4 +81,5 @@ end
     @test test_series_code_iter((1, 2))
     @test test_series_code_iter([1, 2])
     @test test_series_code_iter(Dict("1" => 1, "2" => 2))
+
 end
