@@ -8,7 +8,7 @@ The project was inspired by [python-bcb](https://github.com/wilsonfreitas/python
 
 ## About the project
 
-> Current release: 0.1.1 (2024-03-25)
+> Current release: 0.2.0 (2024-04-23)
 
 Based on the python-bcb package for python, BrazilCentralBank.jl aims to provide the same level of features to the Julia Language. Currently the package can interact with the foreign exchange (FOREX) prices as shows in the time series availiable in the Brazil's Central Bank (BCB) website.
 

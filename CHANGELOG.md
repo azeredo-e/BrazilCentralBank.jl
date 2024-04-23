@@ -22,4 +22,15 @@ None.
 
 ### Future breaks
 
-In version 0.2.0 the `gettimeseries` function will be renamed to `getforexseries`.
+In version 0.2.0 the `gettimeseries` function will be renamed to `getcurrencyseries`.
+
+## Ver. 0.2.0 - 2024-04-23
+
+## Release highlights
+
+Creation of the SGS module, giving the API access to the time series database of the Brazilian Central Bank.
+
+## Breaking changes
+
+- `gettimeseries` from the currency module renamed to `getcurrencyseries`
+- `getCurrency` from the currency module renamed to `Currency`

@@ -4,7 +4,7 @@ Welcome to the documentation page!
 
 ## About the Project
 
-> Current release: 0.1.1 (2024-03-25)
+> Current release: 0.2.0 (2024-04-23)
 
 Based on the python-bcb package for python, BrazilCentralBank.jl aims to provide the same level of features to the Julia Language. Currently the package can interact with the foreign exchange (FOREX) prices as shows in the time series availiable in the Brazil's Central Bank (BCB) website.
 
@@ -18,12 +18,4 @@ Source code are avaliable in this project directory, but instalation through Jul
 
 ```julia
 julia> using Pkg; Pkg.add(BrazilCentralBank)
-```
-
-## API Documentation
-
-```@docs
-BrazilCentralBank
-getcurrency_list(;convert_to_utf=true)
-gettimeseries(symbols::Union{String, Array}, start::Union{AbstractTime, AbstractString, Number}, finish::Union{AbstractTime, AbstractString, Number}; side::String="side", groupby::String="symbol")
 ```
