@@ -81,7 +81,6 @@ DataFrame: Selected currencies information.
         finish::Union{AbstractTime, AbstractString, Number};
         kwargs...
     )
-        #TODO: Change this to the new name in 0.2.0
         if target isa Array
             return getcurrencyseries([symbol, target...], start, finish; kwargs...)
         else
@@ -168,7 +167,6 @@ end
 
 function _get_symbol(symbol::String, start_date, end_date)
     cid = _get_currency_id(symbol)
-    #TODO: Create a check for the dates, max interval is 6 months
     url = _currency_url(cid, start_date, end_date)
     res = HTTP.get(url)
     
@@ -213,7 +211,6 @@ function _get_symbol(symbol::String, start_date, end_date)
     )    
     #TODO: How the f* do I do a multilayer index in julia?!
     #? Answer, I can't, changing approach until they fix this
-    #TODO: Check to see if it breaks before pushing to 0.2.0
     df_bidask = df[:, [:Date, :bid, :ask]]
     rename!(df_bidask,
         :bid => "bid_$symbol",
@@ -431,7 +428,6 @@ function getcurrencyseries(symbols::Union{String, Array},
                        finish::Union{AbstractTime, AbstractString, Number}; #Keyword arguments starts here
                        side::String="ask",
                        groupby::String="symbol")
-    #TODO: Fix types of a arguments
     if isa(symbols, String)
         symbols = [symbols]
     end
