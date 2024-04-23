@@ -15,15 +15,15 @@ using DataFrames
 #*                                STRUCTS
 #* #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-
 
-struct SGSCode{S<:AbstractString, N<:Number}
+struct SGSCode{S<:AbstractString, N<:Integer}
     name::S
     value::N
 
     function SGSCode(code::Union{Integer, AbstractString})
-        new{AbstractString, Number}(string(code), convertToInt32(code))
+        new{AbstractString, Integer}(string(code), convertToInt32(code))
     end
     function SGSCode(code::Pair)
-        new{AbstractString, Number}(code.first, convertToInt32(code.second))
+        new{AbstractString, Integer}(code.first, convertToInt32(code.second))
     end
     #TODO: Add support to named tuples
     # function SGSCode(code::Tuple{AbstractString, Number})
@@ -96,6 +96,8 @@ function _format_df(df, code)
     if "enddate" in names(df) 
         df.enddate = passmissing(x -> Date(x, DateFormat("dd/mm/yyyy"))).(df.enddate)
     end
+
+    df[!, code.name] = parse.(Float64, df[:, code.name])
     
     #TODO: Implement frequency, maybe create a type or something
     return df
@@ -109,14 +111,14 @@ end
 Returns a DataFrame with the SGS time series.
 
 # Args
-codes(Number, AbstractString, Tuple{AbstractString, Number}, Array{AbstractString, Number}, Dict{AbstractString, Number}):\\
-    The codes for the desired time series, please note that even though any number
-    format is accepted, it is converted to an integer.\\
+codes(Integer, AbstractString, Dict{AbstractString, Number}, Tuple{Integer, Vararg{Int}}):\\
+    The codes for the desired time series.\\
     The codes can be in one of the following formats:\\
-    - `Number`: time-series code\\
+    - `Integer`: time-series code\\
     - `Tuple`: tuple containing the desired time-series' codes\\
     - `Dict`: Dictionary with the pair ("SeriesName" => code)\\
-    When using codes is interesting to define names for the columns to be used in the time-series
+    When using a Dict, you can define a name for the series. This is the name to be used in the column
+    name, if not defined, it will default to the code.
 
 start(Number, String...): Any value that can be converted to a date with `Date()` is valid.\\
 Start date of the series.
@@ -138,6 +140,64 @@ multi(Bool): If true, returns a single series with multiple variable, if false,
 # Raises
 ErrorException: Failed to fetch time-series data.
 
+# Examples
+
+```jldoctest
+julia> gettimeseries(1, last=5)
+5×2 DataFrame
+ Row │ Date        1       
+     │ Date        Float64
+─────┼─────────────────────
+   1 │ 2024-04-15   5.1746
+   2 │ 2024-04-16   5.2635
+   3 │ 2024-04-17   5.2469
+   4 │ 2024-04-18   5.2512
+   5 │ 2024-04-19   5.2269
+
+julia> gettimeseries(Dict("USDBRL" => 1), last=5)
+5×2 DataFrame
+ Row │ Date        USDBRL  
+     │ Date        Float64
+─────┼─────────────────────
+   1 │ 2024-04-15   5.1746
+   2 │ 2024-04-16   5.2635
+   3 │ 2024-04-17   5.2469
+   4 │ 2024-04-18   5.2512
+   5 │ 2024-04-19   5.2269
+
+julia> gettimeseries(Dict("USDBRL" => 1), start="2021-01-18", finish="2021-01-22")
+5×2 DataFrame
+ Row │ Date        USDBRL  
+     │ Date        Float64
+─────┼─────────────────────
+   1 │ 2021-01-18   5.2788
+   2 │ 2021-01-19   5.2945
+   3 │ 2021-01-20   5.3033
+   4 │ 2021-01-21   5.3166
+   5 │ 2021-01-22   5.4301
+
+julia> gettimeseries((1, 433), last=5)
+
+
+julia> gettimeseries((1, 433), last=5, multi=false)
+DataFrame[5×2 DataFrame
+ Row │ Date        1       
+     │ Date        Float64
+─────┼─────────────────────
+   1 │ 2024-04-15   5.1746
+   2 │ 2024-04-16   5.2635
+   3 │ 2024-04-17   5.2469
+   4 │ 2024-04-18   5.2512
+   5 │ 2024-04-19   5.2269, 5×2 DataFrame
+ Row │ Date        433     
+     │ Date        Float64
+─────┼─────────────────────
+   1 │ 2023-11-01     0.28
+   2 │ 2023-12-01     0.56
+   3 │ 2024-01-01     0.42
+   4 │ 2024-02-01     0.83
+   5 │ 2024-03-01     0.16]
+```
 """
 function gettimeseries(codes; start=nothing, finish=nothing,
                        last=0, multi=true)
@@ -169,7 +229,9 @@ function gettimeseries(codes; start=nothing, finish=nothing,
         return dfs[1]
     else
         if multi
-            return innerjoin(dfs..., on=:Date)
+            df_join = outerjoin(dfs..., on=:Date)
+            sort!(df_join, :Date)
+            return df_join
         else
             return dfs
         end

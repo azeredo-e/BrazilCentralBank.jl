@@ -11,7 +11,7 @@ module BrazilCentralBank
 include("Currency.jl")
 include("Sgs.jl")
 
-export getcurrency_list, gettimeseries, getCurrency
+export getcurrency_list, getcurrencyseries, Currency,
        # Sgs
        gettimeseries
 

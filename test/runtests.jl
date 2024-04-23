@@ -34,17 +34,20 @@ function test_series_code_iter(codes)
 end
 
 function test_gettimeseries()
-    x = gettimeseries(1, last=10)
+    x = gettimeseries(1, last=5)
+    println(x)
     @assert x isa DataFrame
     @assert names(x) == ["Date", "1"]
-    @assert nrow(x) == 10
+    @assert nrow(x) == 5
     
     x = gettimeseries(Dict("USDBRL" => 1), last=5)
+    println(x)
     @assert x isa DataFrame
     @assert names(x) == ["Date", "USDBRL"]
     @assert nrow(x) == 5
 
     x = gettimeseries(Dict("USDBRL" => 1), start="2021-01-18", finish="2021-01-22")
+    println(x)
     @assert x isa DataFrame
     @assert names(x) == ["Date", "USDBRL"]
     @assert nrow(x) == 5
@@ -52,15 +55,17 @@ function test_gettimeseries()
     @assert x[end, "Date"] == Date("2021-01-22")
 
     x = gettimeseries((1, 433), last=5)
+    println(x)
     @assert x isa DataFrame
     @assert names(x) |> length == 3
 
     x = gettimeseries((1, 433), last=5, multi=false)
+    println(x)
     @assert x isa Array{DataFrame}
 
     # Invalid series value test
     gettimeseries(2, last=5)
-    
+
     return true
 end
 
@@ -69,22 +74,22 @@ end
     @test BrazilCentralBank._get_currency_id("USD") == 61
     @test getcurrency_list() isa DataFrame
     @test BrazilCentralBank.CACHE[:CURRENCY_LIST] isa DataFrame
-    @test gettimeseries("USD", 2023, 2024; side="both") isa DataFrame
-    @test gettimeseries(["USD", "CHF"], Date(2023), Date(2024)) isa DataFrame
+    @test getcurrencyseries("USD", 2023, 2024; side="both") isa DataFrame
+    @test getcurrencyseries(["USD", "CHF"], Date(2023), Date(2024)) isa DataFrame
     try
-        df = gettimeseries("test", Date(2020, 12, 01), Date(2020, 12, 05))
+        df = getcurrencyseries("test", Date(2020, 12, 01), Date(2020, 12, 05))
     catch err
         @test err isa ArgumentError
     end
     
     # Ver. 0.1.1
-    EUR = getCurrency(978)
-    @test EUR.symbol == "EUR"
+    @test Currency("EUR") isa BrazilCentralBank.Currency
+    EUR = Currency(978)
     @test EUR isa BrazilCentralBank.Currency
-    @test getCurrency("EUR") isa BrazilCentralBank.Currency
-    @test EUR.gettimeseries("USD", Date(2020, 12, 01), Date(2020, 12, 05)) isa DataFrame
-    @test EUR.gettimeseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05)) isa DataFrame
-    @test EUR.gettimeseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05), groupby="symbol") isa DataFrame
+    @test EUR.symbol == "EUR"
+    @test EUR.getcurrencyseries("USD", Date(2020, 12, 01), Date(2020, 12, 05)) isa DataFrame
+    @test EUR.getcurrencyseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05)) isa DataFrame
+    @test EUR.getcurrencyseries(["USD", "CHF"], Date(2020, 12, 01), Date(2020, 12, 05), groupby="symbol") isa DataFrame
 
     # Ver. 0.2.0
     @test test_series_code()

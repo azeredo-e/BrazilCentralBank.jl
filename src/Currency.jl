@@ -75,7 +75,7 @@ DataFrame: Selected currencies information.
     exclusion_date::D
 
     # "Methods"
-    gettimeseries::F = function _getforexseries(
+    getcurrencyseries::F = function _getcurrencyseries(
         target::Union{AbstractString, Array},
         start::Union{AbstractTime, AbstractString, Number},
         finish::Union{AbstractTime, AbstractString, Number};
@@ -83,9 +83,9 @@ DataFrame: Selected currencies information.
     )
         #TODO: Change this to the new name in 0.2.0
         if target isa Array
-            return gettimeseries([symbol, target...], start, finish; kwargs...)
+            return getcurrencyseries([symbol, target...], start, finish; kwargs...)
         else
-            return gettimeseries([symbol, target], start, finish; kwargs...)
+            return getcurrencyseries([symbol, target], start, finish; kwargs...)
         end
     end
 end
@@ -138,7 +138,7 @@ function _get_current_currency_list(_date, n=0)
     catch err
         if isa(err, HTTP.Exceptions.ConnectError)
             if n >= 3
-                throw(HTTP.Exceptions.ConnectError(url=url, error="Conexão falhou"))
+                throw(HTTP.Exceptions.ConnectError(url=url, error="Connection failed"))
             end
         end
         return _get_current_currency_list(_date, n+1)
@@ -225,7 +225,7 @@ end
 
 
 """
-    getCurrency(code::Integer) -> Currency
+    Currency(code::Integer) -> Currency
 
 A `Currency` is an instance of the Currency type attribuited to a specific currency supported by the
 BrazilCentralBank.jl API, you can check the list of avaliable currencies with. `getcurrency_list()`.
@@ -241,7 +241,7 @@ code(Integer): Code for the currency as is in `getcurrency_list()`.
 Currency: Desired currency
 ```
 """
-function getCurrency(code::Integer)
+function Currency(code::Integer)
     if haskey(CACHE, :CURRENCY_LIST)
         df = get(CACHE, :CURRENCY_LIST, missing)
     else
@@ -260,7 +260,7 @@ function getCurrency(code::Integer)
     
 end
 """
-    getCurrency(code::String) -> Currency
+    Currency(code::String) -> Currency
 
 A `Currency` is an instance of the Currency type attribuited to a specific currency supported by the
 BrazilCentralBank.jl API, you can check the list of avaliable currencies with. `getcurrency_list()`.
@@ -275,7 +275,7 @@ symbol(String): ISO three letter code for the currency.
 # Returns
 Currency: Desired currency
 """
-function getCurrency(symbol::String)
+function Currency(symbol::String)
     if haskey(CACHE, :CURRENCY_LIST)
         df = get(CACHE, :CURRENCY_LIST, missing)
     else
@@ -386,12 +386,12 @@ function getcurrency_list(;convert_to_utf::Bool=true)
 end
 
 
-""" #!fix name for 0.2.0
-    gettimeseries(symbols::Union{String, Array},
-                  start::Any,
-                  finish::Any,
-                  side::String="ask",
-                  groupby::String="symbol")
+"""
+    getcurrencyseries(symbols::Union{String, Array},
+                      start::Any,
+                      finish::Any,
+                      side::String="ask",
+                      groupby::String="symbol")
 
 DataFrame with the time series of selected currencies.
 
@@ -411,8 +411,8 @@ DataFrames.DataFrame: DataFrame with foreign currency prices.
 ArgumentError: Values passed to `side` or `groupby` are not valid.
 
 # Examples:
-```jldoctest #! fix for 0.2.0
-julia> gettimeseries("USD", "2023-12-01", "2023-12-10")
+```jldoctest
+julia> getcurrencyseries("USD", "2023-12-01", "2023-12-10")
 6×2 DataFrame
  Row │ Date        ask_USD 
      │ Date        Float64
@@ -426,7 +426,7 @@ julia> gettimeseries("USD", "2023-12-01", "2023-12-10")
 ```
 
 """
-function gettimeseries(symbols::Union{String, Array},
+function getcurrencyseries(symbols::Union{String, Array},
                        start::Union{AbstractTime, AbstractString, Number},
                        finish::Union{AbstractTime, AbstractString, Number}; #Keyword arguments starts here
                        side::String="ask",
@@ -475,7 +475,6 @@ function gettimeseries(symbols::Union{String, Array},
             thow(ArgumentError("Unknown side value, use: bid, ask, both"))
         end
     else
-        @info "No values passed to the gettimeseries function."
         return nothing
     end
 end
