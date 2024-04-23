@@ -14,7 +14,7 @@ makedocs(
         "Notes on Implementation" => "impl.md",
         "API Documentation" => "api_docs.md"
     ],
-    checkdocs = :export #Only check the docstring of exported functions
+    doctest = false
 )
 
 deploydocs(

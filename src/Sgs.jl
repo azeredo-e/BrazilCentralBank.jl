@@ -148,11 +148,11 @@ julia> gettimeseries(1, last=5)
  Row │ Date        1       
      │ Date        Float64
 ─────┼─────────────────────
-   1 │ 2024-04-15   5.1746
-   2 │ 2024-04-16   5.2635
-   3 │ 2024-04-17   5.2469
-   4 │ 2024-04-18   5.2512
-   5 │ 2024-04-19   5.2269
+   1 │ 2024-04-16   5.2635
+   2 │ 2024-04-17   5.2469
+   3 │ 2024-04-18   5.2512
+   4 │ 2024-04-19   5.2269
+   5 │ 2024-04-22   5.2043
 
 julia> gettimeseries(Dict("USDBRL" => 1), last=5)
 5×2 DataFrame
@@ -177,18 +177,33 @@ julia> gettimeseries(Dict("USDBRL" => 1), start="2021-01-18", finish="2021-01-22
    5 │ 2021-01-22   5.4301
 
 julia> gettimeseries((1, 433), last=5)
-
+10×3 DataFrame
+ Row │ Date        1             433
+     │ Date        Float64?      Float64?
+─────┼──────────────────────────────────────
+   1 │ 2023-11-01  missing             0.28
+   2 │ 2023-12-01  missing             0.56
+   3 │ 2024-01-01  missing             0.42
+   4 │ 2024-02-01  missing             0.83
+   5 │ 2024-03-01  missing             0.16
+   6 │ 2024-04-16        5.2635  missing
+   7 │ 2024-04-17        5.2469  missing
+   8 │ 2024-04-18        5.2512  missing
+   9 │ 2024-04-19        5.2269  missing
+  10 │ 2024-04-22        5.2043  missing
 
 julia> gettimeseries((1, 433), last=5, multi=false)
-DataFrame[5×2 DataFrame
+2-element Vector{DataFrames.DataFrame}:
+ 5×2 DataFrame
  Row │ Date        1       
      │ Date        Float64
 ─────┼─────────────────────
-   1 │ 2024-04-15   5.1746
-   2 │ 2024-04-16   5.2635
-   3 │ 2024-04-17   5.2469
-   4 │ 2024-04-18   5.2512
-   5 │ 2024-04-19   5.2269, 5×2 DataFrame
+   1 │ 2024-04-16   5.2635
+   2 │ 2024-04-17   5.2469
+   3 │ 2024-04-18   5.2512
+   4 │ 2024-04-19   5.2269
+   5 │ 2024-04-22   5.2043
+ 5×2 DataFrame
  Row │ Date        433     
      │ Date        Float64
 ─────┼─────────────────────
@@ -196,7 +211,7 @@ DataFrame[5×2 DataFrame
    2 │ 2023-12-01     0.56
    3 │ 2024-01-01     0.42
    4 │ 2024-02-01     0.83
-   5 │ 2024-03-01     0.16]
+   5 │ 2024-03-01     0.16
 ```
 """
 function gettimeseries(codes; start=nothing, finish=nothing,
